@@ -6,6 +6,8 @@ import {
   TUser,
   UserModel,
 } from './user.interface';
+import bcrypt from 'bcrypt';
+import config from '../../config';
 
 const fullNameSchema = new Schema<TFullName>({
   firstName: {
@@ -78,10 +80,20 @@ const userSchema = new Schema<TUser, UserModel>({
   },
 });
 
-// userSchema.methods.isUserExists = async function (id: string) {
-//   const existingUser = await User.findOne({ id });
-//   return existingUser;
-// };
+userSchema.pre('save', async function (next) {
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_round),
+  );
+
+  userSchema.post('save', function (doc, next) {
+    doc.password = '';
+    next();
+  });
+
+  next();
+});
 
 userSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await User.findOne({ userId: id });
