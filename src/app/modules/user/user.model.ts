@@ -1,5 +1,11 @@
 import { Schema, model } from 'mongoose';
-import { TAddress, TFullName, TOrders, TUser } from './user.interface';
+import {
+  TAddress,
+  TFullName,
+  TOrders,
+  TUser,
+  UserModel,
+} from './user.interface';
 
 const fullNameSchema = new Schema<TFullName>({
   firstName: {
@@ -36,10 +42,10 @@ const ordersSchema = new Schema<TOrders>({
   },
 });
 
-const userSchema = new Schema<TUser>({
+const userSchema = new Schema<TUser, UserModel>({
   userId: {
     type: Number,
-    required: true,
+    required: [true, 'You must have a user id.'],
     unique: true,
   },
   username: {
@@ -48,7 +54,7 @@ const userSchema = new Schema<TUser>({
   },
   password: {
     type: String,
-    required: true,
+    required: [true, 'You must have a password'],
   },
   fullName: fullNameSchema,
   age: {
@@ -56,6 +62,7 @@ const userSchema = new Schema<TUser>({
   },
   email: {
     type: String,
+    unique: true,
   },
   isActive: {
     type: Boolean,
@@ -71,4 +78,14 @@ const userSchema = new Schema<TUser>({
   },
 });
 
-export const User = model<TUser>('user', userSchema);
+// userSchema.methods.isUserExists = async function (id: string) {
+//   const existingUser = await User.findOne({ id });
+//   return existingUser;
+// };
+
+userSchema.statics.isUserExists = async function (id: string) {
+  const existingUser = await User.findOne({ userId: id });
+  return existingUser;
+};
+
+export const User = model<TUser, UserModel>('user', userSchema);
