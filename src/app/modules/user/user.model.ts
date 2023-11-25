@@ -12,37 +12,40 @@ import config from '../../config';
 const fullNameSchema = new Schema<TFullName>({
   firstName: {
     type: String,
-    required: true,
+    required: [true, 'You must have your first name.'],
   },
   lastName: {
     type: String,
-    required: true,
+    required: [true, 'You must have your last name.'],
   },
 });
 
 const addressSchema = new Schema<TAddress>({
   street: {
     type: String,
+    required: [true, 'street is required'],
   },
   city: {
     type: String,
+    required: [true, 'city is required.'],
   },
   country: {
-    String,
+    type: String,
+    required: [true, 'country is required.'],
   },
 });
 
-const ordersSchema = new Schema<TOrders>({
-  productName: {
-    type: String,
-  },
-  price: {
-    type: Number,
-  },
-  quantity: {
-    type: Number,
-  },
-});
+// const ordersSchema = new Schema<TOrders>({
+//   productName: {
+//     type: String,
+//   },
+//   price: {
+//     type: Number,
+//   },
+//   quantity: {
+//     type: Number,
+//   },
+// });
 
 const userSchema = new Schema<TUser, UserModel>({
   userId: {
@@ -53,30 +56,53 @@ const userSchema = new Schema<TUser, UserModel>({
   username: {
     type: String,
     unique: true,
+    required: [true, 'You must have a user name.'],
   },
   password: {
     type: String,
-    required: [true, 'You must have a password'],
+    required: [true, 'You must have a password.'],
   },
-  fullName: fullNameSchema,
+  fullName: {
+    type: fullNameSchema,
+    required: [true, 'You must have your full name'],
+  },
   age: {
     type: Number,
+    required: [true, 'You must have an age.'],
   },
   email: {
     type: String,
     unique: true,
+    required: [true, 'You must have an email.'],
   },
   isActive: {
     type: Boolean,
+    default: true,
   },
   hobbies: {
     type: [String],
+    required: [true, 'You must have your hobby.'],
   },
   address: {
     type: addressSchema,
+    required: [true, 'You must have your address'],
   },
   orders: {
-    type: [ordersSchema],
+    type: [
+      {
+        productName: {
+          type: String,
+        },
+        price: {
+          type: Number,
+        },
+        quantity: {
+          type: Number,
+        },
+      },
+    ],
+    default: undefined,
+    _id: false,
   },
 });
 
@@ -86,12 +112,11 @@ userSchema.pre('save', async function (next) {
     user.password,
     Number(config.bcrypt_salt_round),
   );
+  next();
+});
 
-  userSchema.post('save', function (doc, next) {
-    doc.password = '';
-    next();
-  });
-
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
   next();
 });
 

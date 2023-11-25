@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
 import { userServices } from './user.service';
+import { userValidationSchema } from './user.validation';
 
 const createUser = async (req: Request, res: Response) => {
   try {
     const userData = req.body;
-    const result = await userServices.createUser(userData);
+
+    const zodparseData = userValidationSchema.parse(userData);
+
+    const result = await userServices.createUser(zodparseData);
     res.status(201).json({
       success: 'true',
       message: 'User Created Successfully.',
@@ -32,6 +36,10 @@ const getAllUsers = async (req: Request, res: Response) => {
     res.status(500).json({
       seccess: 'false',
       message: error.message || 'Something went wrong.',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
     });
   }
 };
@@ -50,6 +58,10 @@ const getSingleUser = async (req: Request, res: Response) => {
     res.status(500).json({
       success: 'false',
       message: error.message || 'Something went wrong.',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
     });
   }
 };
@@ -68,6 +80,10 @@ const updateUser = async (req: Request, res: Response) => {
     res.status(500).json({
       seccess: 'false',
       message: error.message || 'Something went wrong.',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
     });
   }
 };
@@ -76,14 +92,41 @@ const deleteUser = async (req: Request, res: Response) => {
     const id = req.params.userId;
     await userServices.deleteUser(id);
     res.status(200).json({
-      status: 'success',
+      success: 'true',
       message: 'User Deleted Successfully.',
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     res.status(500).json({
-      status: 'False',
+      success: 'false',
       message: error.message || 'Something went wrong.',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
+    });
+  }
+};
+
+const createOrders = async (req: Request, res: Response) => {
+  try {
+    const userData = req.body;
+    const id = req.params.userId;
+    const result = await userServices.createOrders(id, userData);
+    res.status(200).json({
+      success: 'true',
+      message: 'Order created Successfully.',
+      data: result,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    res.status(500).json({
+      seccess: 'false',
+      message: error.message || 'Something went wrong.',
+      error: {
+        code: 404,
+        description: 'User not found!',
+      },
     });
   }
 };
@@ -94,4 +137,5 @@ export const userControllers = {
   getSingleUser,
   updateUser,
   deleteUser,
+  createOrders,
 };

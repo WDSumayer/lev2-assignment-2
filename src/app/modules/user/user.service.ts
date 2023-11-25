@@ -27,7 +27,7 @@ const getSingleUser = async (id: string): Promise<TUser | null> => {
   if (userExists === null) {
     throw new Error('User not found.');
   }
-  const result = await User.findOne({ userId: id });
+  const result = await User.findOne({ userId: id }).select('-password');
   return result;
 
   //   const result = await User.findOne({ userId: id });
@@ -46,7 +46,7 @@ const updateUser = async (
   const result = await User.findOneAndUpdate({ userId: id }, userData, {
     $set: userData,
     new: true,
-  });
+  }).select('-password');
   return result;
 };
 
@@ -60,10 +60,28 @@ const deleteUser = async (id: string): Promise<TUser | null> => {
   return result;
 };
 
+const createOrders = async (
+  id: string,
+  userData: TUser,
+): Promise<TUser | null> => {
+  const userExists = await User.isUserExists(id);
+
+  if (userExists === null) {
+    throw new Error('User not found.');
+  }
+
+  const result = await User.findOneAndUpdate({ userId: id }, userData, {
+    $set: userData,
+    new: true,
+  }).select('-password');
+  return result;
+};
+
 export const userServices = {
   createUser,
   getAllUsers,
   getSingleUser,
   updateUser,
   deleteUser,
+  createOrders,
 };
