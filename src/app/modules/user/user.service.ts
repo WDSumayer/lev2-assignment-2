@@ -77,6 +77,33 @@ const createOrders = async (
   return result;
 };
 
+const getSpecificUserOrders = async (id: string): Promise<TUser | null> => {
+  const userExists = await User.isUserExists(id);
+
+  if (userExists === null) {
+    throw new Error('User not found.');
+  }
+  const result = await User.findOne({ userId: id }, { orders: 1, _id: 0 });
+  return result;
+};
+
+const getSpecificUserOrdersTotalPrice = async (
+  id: string,
+): Promise<{ totalPrice: number | undefined }> => {
+  const userExists = await User.isUserExists(id);
+
+  if (userExists === null) {
+    throw new Error('User not found.');
+  }
+  const user = await User.findOne({ userId: id });
+  const total = user?.orders?.reduce(
+    (a, order) => a + order.price * order.quantity,
+    0,
+  );
+  const totalPrice = { totalPrice: total };
+  return totalPrice;
+};
+
 export const userServices = {
   createUser,
   getAllUsers,
@@ -84,4 +111,6 @@ export const userServices = {
   updateUser,
   deleteUser,
   createOrders,
+  getSpecificUserOrders,
+  getSpecificUserOrdersTotalPrice,
 };
