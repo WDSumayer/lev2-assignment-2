@@ -71,7 +71,7 @@ const createOrders = async (
   }
 
   const result = await User.findOneAndUpdate({ userId: id }, userData, {
-    $set: userData,
+    $addToSet: userData,
     new: true,
   }).select('-password');
   return result;
@@ -96,12 +96,12 @@ const getSpecificUserOrdersTotalPrice = async (
     throw new Error('User not found.');
   }
   const user = await User.findOne({ userId: id });
-  const total = user?.orders?.reduce(
+  const totalPrice = user?.orders?.reduce(
     (a, order) => a + order.price * order.quantity,
     0,
   );
-  const totalPrice = { totalPrice: total };
-  return totalPrice;
+
+  return { totalPrice };
 };
 
 export const userServices = {

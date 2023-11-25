@@ -16,7 +16,6 @@ const createUser = async (req: Request, res: Response) => {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.log(error);
     res.status(500).json({
       success: 'false',
       message: error.message || 'Something went wrong.',
@@ -69,6 +68,7 @@ const updateUser = async (req: Request, res: Response) => {
   try {
     const userData = req.body;
     const id = req.params.userId;
+
     const result = await userServices.updateUser(id, userData);
     res.status(200).json({
       success: 'true',
@@ -112,6 +112,7 @@ const createOrders = async (req: Request, res: Response) => {
   try {
     const userData = req.body;
     const id = req.params.userId;
+
     const result = await userServices.createOrders(id, userData);
     res.status(200).json({
       success: 'true',
